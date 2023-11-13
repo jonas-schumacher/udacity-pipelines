@@ -1,4 +1,6 @@
+black
 flask
+joblib
 jupyter
 matplotlib
 nltk
