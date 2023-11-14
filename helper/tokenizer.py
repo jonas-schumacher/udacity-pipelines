@@ -32,6 +32,6 @@ def tokenize(text: str) -> List[str]:
     # Reduce words to their root form
     lemmatizer = WordNetLemmatizer()
     words_lemmatized = [lemmatizer.lemmatize(w) for w in words_cleaned]
-    words_lemmatized = [lemmatizer.lemmatize(w, pos='v') for w in words_lemmatized]
+    words_lemmatized = [lemmatizer.lemmatize(w, pos="v") for w in words_lemmatized]
 
     return words_lemmatized

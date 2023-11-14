@@ -15,13 +15,13 @@ from sqlalchemy import create_engine
 
 from helper.tokenizer import tokenize
 
-nltk.download('words')
-nltk.download('stopwords')
-nltk.download('wordnet')
-nltk.download('punkt')
+nltk.download("words")
+nltk.download("stopwords")
+nltk.download("wordnet")
+nltk.download("punkt")
 
 RANDOM_SEED = 42
-TABLE_NAME = 'disaster_messages'
+TABLE_NAME = "disaster_messages"
 
 # Flag enabling switch between GridSearch and Default Training:
 PERFORM_GRID_SEARCH = False
@@ -61,11 +61,16 @@ def build_model() -> Union[GridSearchCV, Pipeline]:
     Union[GridSearchCV, Pipeline]
         Model to be trained
     """
-    pipeline = Pipeline([
-        ("vectorizer", TfidfVectorizer(tokenizer=tokenize, token_pattern=None)),
-        # combines CountVectorizer + TfidfTransformer
-        ("classifier", MultiOutputClassifier(RandomForestClassifier(random_state=RANDOM_SEED))),
-    ])
+    pipeline = Pipeline(
+        [
+            ("vectorizer", TfidfVectorizer(tokenizer=tokenize, token_pattern=None)),
+            # combines CountVectorizer + TfidfTransformer
+            (
+                "classifier",
+                MultiOutputClassifier(RandomForestClassifier(random_state=RANDOM_SEED)),
+            ),
+        ]
+    )
 
     if PERFORM_GRID_SEARCH:
         possible_params = pipeline.get_params()
@@ -81,10 +86,12 @@ def build_model() -> Union[GridSearchCV, Pipeline]:
         return pipeline
 
 
-def evaluate_model(model: Union[GridSearchCV, Pipeline],
-                   X_test: np.array,
-                   Y_test: np.array,
-                   category_names: List[str]) -> None:
+def evaluate_model(
+    model: Union[GridSearchCV, Pipeline],
+    X_test: np.array,
+    Y_test: np.array,
+    category_names: List[str],
+) -> None:
     """
     Evaluate a trained model by calculating Precision, Recall and F1 Score
 
@@ -138,37 +145,41 @@ def main():
     print(f"Arguments provided: {sys.argv[1:]}")
     if len(sys.argv) == 3:
         database_filepath, model_filepath = sys.argv[1:]
-        print('Loading data...\n    DATABASE: {}'.format(database_filepath))
+        print("Loading data...\n    DATABASE: {}".format(database_filepath))
         X, Y, category_names = load_data(database_filepath)
-        X_train, X_test, Y_train, Y_test = train_test_split(X, Y, test_size=0.2, random_state=RANDOM_SEED)
+        X_train, X_test, Y_train, Y_test = train_test_split(
+            X, Y, test_size=0.2, random_state=RANDOM_SEED
+        )
 
         # Test tokenize function:
         # print(tokenize(X_train[0]))
 
-        print('Building model...')
+        print("Building model...")
         model = build_model()
 
-        print('Training model...')
+        print("Training model...")
         model.fit(X_train, Y_train)
 
         if PERFORM_GRID_SEARCH:
             print("Best model parameters in GridSearch: ")
             print(model.best_params_)
 
-        print('Evaluating model...')
+        print("Evaluating model...")
         evaluate_model(model, X_test, Y_test, category_names)
 
-        print('Saving model...\n    MODEL: {}'.format(model_filepath))
+        print("Saving model...\n    MODEL: {}".format(model_filepath))
         save_model(model, model_filepath)
 
-        print('Trained model saved!')
+        print("Trained model saved!")
 
     else:
-        print('Please provide the filepath of the disaster messages database ' \
-              'as the first argument and the filepath of the pickle file to ' \
-              'save the model to as the second argument. \n\nExample: python ' \
-              'train_classifier.py ../data/DisasterResponse.db classifier.pkl')
+        print(
+            "Please provide the filepath of the disaster messages database "
+            "as the first argument and the filepath of the pickle file to "
+            "save the model to as the second argument. \n\nExample: python "
+            "train_classifier.py ../data/DisasterResponse.db classifier.pkl"
+        )
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()
