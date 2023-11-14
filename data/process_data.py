@@ -2,6 +2,8 @@ import sys
 import pandas as pd
 from sqlalchemy import create_engine
 
+TABLE_NAME = 'disaster_messages'
+
 
 def load_data(messages_filepath: str, categories_filepath: str) -> pd.DataFrame:
     # ### 1. load datasets
@@ -57,7 +59,7 @@ def save_data(df: pd.DataFrame, database_filename: str):
     # ### 7. Save the clean dataset into an sqlite database.
 
     engine = create_engine(f'sqlite:///{database_filename}')
-    df.to_sql(name='disaster_messages', con=engine, if_exists="replace", index=False)
+    df.to_sql(name=TABLE_NAME, con=engine, if_exists="replace", index=False)
 
 
 def main():

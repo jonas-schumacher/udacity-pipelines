@@ -2,9 +2,7 @@ import json
 import plotly
 import pandas as pd
 
-from nltk.stem import WordNetLemmatizer
-from nltk.tokenize import word_tokenize
-
+from helper.tokenizer import tokenize
 from flask import Flask
 from flask import render_template, request, jsonify
 from plotly.graph_objs import Bar
@@ -16,20 +14,6 @@ TABLE_NAME = "disaster_messages"
 PATH_TO_TRAINED_PIPELINE = "../models/disaster.pkl"
 
 app = Flask(__name__)
-
-
-# TODO: use same tokenize function as in classifier
-def tokenize(text):
-    tokens = word_tokenize(text)
-    lemmatizer = WordNetLemmatizer()
-
-    clean_tokens = []
-    for tok in tokens:
-        clean_tok = lemmatizer.lemmatize(tok).lower().strip()
-        clean_tokens.append(clean_tok)
-
-    return clean_tokens
-
 
 # load data
 engine = create_engine(f'sqlite:///{PATH_TO_DATABASE}')
