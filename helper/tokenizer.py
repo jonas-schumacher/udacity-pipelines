@@ -1,11 +1,25 @@
 import re
+from typing import List
 
 from nltk.corpus import stopwords
 from nltk.stem.wordnet import WordNetLemmatizer
 from nltk.tokenize import word_tokenize
 
 
-def tokenize(text):
+def tokenize(text: str) -> List[str]:
+    """
+    Tokenize a given sentence by normalizing, removing stopwords and lemmatizing.
+
+    Parameters
+    ----------
+    text: str
+        given sentence
+
+    Returns
+    -------
+    List[str]
+        tokenized sentence
+    """
     # Normalize text
     normalized_text = re.sub(r"[^a-zA-Z0-9]", " ", text.lower())
 
@@ -21,15 +35,3 @@ def tokenize(text):
     words_lemmatized = [lemmatizer.lemmatize(w, pos='v') for w in words_lemmatized]
 
     return words_lemmatized
-
-
-def tokenize_from_flask(text):
-    tokens = word_tokenize(text)
-    lemmatizer = WordNetLemmatizer()
-
-    clean_tokens = []
-    for tok in tokens:
-        clean_tok = lemmatizer.lemmatize(tok).lower().strip()
-        clean_tokens.append(clean_tok)
-
-    return clean_tokens
