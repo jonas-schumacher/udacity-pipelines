@@ -23,8 +23,9 @@ nltk.download("punkt")
 RANDOM_SEED = 42
 TABLE_NAME = "disaster_messages"
 
-# Flag enabling switch between GridSearch and Default Training:
-PERFORM_GRID_SEARCH = False
+# Parameters to reduce the training complexity
+PERFORM_GRID_SEARCH = False  # whether to perform grid search or not
+MAX_NUMBER_OF_SAMPLES = 100000  # whether to reduce the number of samples
 
 
 def load_data(database_filepath: str) -> Tuple[np.array, np.array, List[str]]:
@@ -45,8 +46,8 @@ def load_data(database_filepath: str) -> Tuple[np.array, np.array, List[str]]:
     """
     engine = create_engine(f"sqlite:///{database_filepath}")
     df = pd.read_sql_table(table_name=TABLE_NAME, con=engine)
-    X = df.iloc[:, 1].values[:]
-    Y = df.iloc[:, 4:].values[:]
+    X = df.iloc[:, 1].values[:MAX_NUMBER_OF_SAMPLES]
+    Y = df.iloc[:, 4:].values[:MAX_NUMBER_OF_SAMPLES]
     category_names = list(df.columns[4:])
 
     return X, Y, category_names
@@ -87,10 +88,10 @@ def build_model() -> Union[GridSearchCV, Pipeline]:
 
 
 def evaluate_model(
-    model: Union[GridSearchCV, Pipeline],
-    X_test: np.array,
-    Y_test: np.array,
-    category_names: List[str],
+        model: Union[GridSearchCV, Pipeline],
+        X_test: np.array,
+        Y_test: np.array,
+        category_names: List[str],
 ) -> None:
     """
     Evaluate a trained model by calculating Precision, Recall and F1 Score
@@ -116,10 +117,10 @@ def evaluate_model(
             output_dict=True,
             zero_division=np.nan,
         )["weighted avg"]
-        # print(f"{col_name}: {average_scores}")
+        print(f"{col_name} -> {average_scores}")
         score_dict[col_name] = average_scores
     score_df = pd.DataFrame(score_dict)
-    print(score_df.mean(axis=1))
+    print(f"Average scores: {score_df.mean(axis=1)}")
     score_df.to_csv("score_df.csv", sep=";")
 
 

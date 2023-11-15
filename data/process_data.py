@@ -56,6 +56,11 @@ def clean_data(df: pd.DataFrame) -> pd.DataFrame:
     df = df.drop(columns=["categories"])
     df = pd.concat([df, categories], axis=1)
 
+    # Values "0" and "2" from column "related" seem to have same meaning --> replace "2" by "0"
+    df.loc[df["related"] == 2, "related"] = 0
+    # After doing so, output should be binary:
+    all(df.iloc[:, 4:].isin([0, 1]))
+
     # Drop duplicates:
     print(f"Duplicates before dropping: {df.duplicated().sum()}")
     df = df.drop_duplicates()
