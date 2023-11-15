@@ -65,11 +65,18 @@ def build_model() -> Union[GridSearchCV, Pipeline]:
     """
     pipeline = Pipeline(
         [
-            ("vectorizer", TfidfVectorizer(tokenizer=tokenize, token_pattern=None)),
-            # combines CountVectorizer + TfidfTransformer
+            ("vectorizer", TfidfVectorizer(
+                tokenizer=tokenize,
+                token_pattern=None,
+                ngram_range=(1, 1),
+            )),
             (
                 "classifier",
-                MultiOutputClassifier(RandomForestClassifier(random_state=RANDOM_SEED)),
+                MultiOutputClassifier(RandomForestClassifier(
+                    random_state=RANDOM_SEED,
+                    n_estimators=100,
+                    min_samples_split=2,
+                )),
             ),
         ]
     )
@@ -77,9 +84,9 @@ def build_model() -> Union[GridSearchCV, Pipeline]:
     if PERFORM_GRID_SEARCH:
         possible_params = pipeline.get_params()
         parameters = {
-            "vectorizer__ngram_range": ((1, 1), (1, 2)),
-            "classifier__estimator__n_estimators": [50, 100, 200],
-            "classifier__estimator__min_samples_split": [2, 3, 4],
+            "vectorizer__ngram_range": ((1, 1), (1, 2)),  # best = (1,1)
+            "classifier__estimator__n_estimators": [50, 100, 200],  # best = 100
+            "classifier__estimator__min_samples_split": [2, 3, 4],  # best = 2
         }
         cv = GridSearchCV(pipeline, param_grid=parameters)
         return cv
