@@ -5,19 +5,21 @@ import pandas as pd
 from helper.tokenizer import tokenize
 from flask import Flask
 from flask import render_template, request, jsonify
-from plotly.graph_objs import Bar
+from plotly.graph_objs import Bar, Pie
 import joblib
 from sqlalchemy import create_engine
 
 PATH_TO_DATABASE = "../data/DisasterResponse.db"
 TABLE_NAME = "disaster_messages"
 PATH_TO_TRAINED_PIPELINE = "../models/disaster.pkl"
+PATH_TO_SCORE_TABLE = "../models/score_df.csv"
 
 app = Flask(__name__)
 
 # load data
 engine = create_engine(f"sqlite:///{PATH_TO_DATABASE}")
 df = pd.read_sql_table(TABLE_NAME, engine)
+score_df = pd.read_csv(PATH_TO_SCORE_TABLE, sep=";", index_col=0)
 
 # load model
 model = joblib.load(PATH_TO_TRAINED_PIPELINE)
@@ -28,12 +30,18 @@ model = joblib.load(PATH_TO_TRAINED_PIPELINE)
 @app.route("/index")
 def index():
     # extract data needed for visuals
-    # TODO: Below is an example - modify to extract data for your own visuals
     genre_counts = df.groupby("genre").count()["message"]
     genre_names = list(genre_counts.index)
 
+    related_df = df[df["related"] == 1]
+    category_count = df.iloc[:, 5:].sum(axis=0)
+    most_common_categories = category_count.sort_values(ascending=False).iloc[:10]
+    least_common_categories = category_count.sort_values(ascending=True).iloc[:10]
+
+    mean_scores = score_df.mean(axis=1).iloc[:3]
+    f1_sorted = score_df.loc["f1-score", :].sort_values()
+
     # create visuals
-    # TODO: Below is an example - modify to create your own visuals
     graphs = [
         {
             "data": [Bar(x=genre_names, y=genre_counts)],
@@ -42,6 +50,47 @@ def index():
                 "yaxis": {"title": "Count"},
                 "xaxis": {"title": "Genre"},
             },
+        },
+        {
+            "data": [Pie(labels=["related", "unrelated"], values=[len(related_df), len(df) - len(related_df)])],
+            "layout": {
+                "title": "Share of related messages",
+            },
+        },
+        {
+            "data": [Bar(x=most_common_categories.index, y=most_common_categories.values)],
+            "layout": {
+                "title": "Most common categories",
+                "yaxis": {"title": "Count"},
+                "xaxis": {"title": "Category"},
+            },
+        },
+        {
+            "data": [Bar(x=least_common_categories.index, y=least_common_categories.values)],
+            "layout": {
+                "title": "Least common categories",
+                "yaxis": {"title": "Count"},
+                "xaxis": {"title": "Category"},
+            },
+        },
+    ]
+
+    graphs_training = [
+        {
+            "data": [Bar(x=mean_scores.index, y=mean_scores.values)],
+            "layout": {
+                "title": "Average metrics across categories",
+                "yaxis": {"title": "Value"},
+                "xaxis": {"title": "Metric"},
+            },
+        },
+        {
+            "data": [Bar(x=f1_sorted.index, y=f1_sorted.values)],
+            "layout": {
+                "title": "F1 Score for all categories",
+                "yaxis": {"title": "Count"},
+                "xaxis": {"title": "Category"},
+            },
         }
     ]
 
@@ -49,8 +98,12 @@ def index():
     ids = ["graph-{}".format(i) for i, _ in enumerate(graphs)]
     graphJSON = json.dumps(graphs, cls=plotly.utils.PlotlyJSONEncoder)
 
+    ids_training = ["graph-training-{}".format(i) for i, _ in enumerate(graphs_training)]
+    graphJSON_training = json.dumps(graphs_training, cls=plotly.utils.PlotlyJSONEncoder)
+
     # render web page with plotly graphs
-    return render_template("master.html", ids=ids, graphJSON=graphJSON)
+    return render_template("master.html", ids=ids, graphJSON=graphJSON, ids_training=ids_training,
+                           graphJSON_training=graphJSON_training)
 
 
 # web page that handles user query and displays model results
