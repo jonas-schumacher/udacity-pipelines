@@ -1,3 +1,4 @@
+import os
 import sys
 from typing import Tuple, List, Union
 
@@ -13,7 +14,8 @@ from sklearn.multioutput import MultiOutputClassifier
 from sklearn.pipeline import Pipeline
 from sqlalchemy import create_engine
 
-from helper.tokenizer import tokenize
+sys.path.append(os.getcwd())
+from common.shared import tokenize, TABLE_NAME, PATH_TO_SCORE_TABLE
 
 nltk.download("words")
 nltk.download("stopwords")
@@ -21,7 +23,6 @@ nltk.download("wordnet")
 nltk.download("punkt")
 
 RANDOM_SEED = 42
-TABLE_NAME = "disaster_messages"
 
 # Parameters to reduce the training complexity
 PERFORM_GRID_SEARCH = False  # whether to perform grid search or not
@@ -121,7 +122,7 @@ def evaluate_model(
         score_dict[col_name] = average_scores
     score_df = pd.DataFrame(score_dict)
     print(f"Average scores: {score_df.mean(axis=1)}")
-    score_df.to_csv("score_df.csv", sep=";")
+    score_df.to_csv(PATH_TO_SCORE_TABLE, sep=";")
 
 
 def save_model(model: Union[GridSearchCV, Pipeline], model_filepath: str) -> None:

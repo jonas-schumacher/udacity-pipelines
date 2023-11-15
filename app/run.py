@@ -1,18 +1,18 @@
 import json
+import os
+import sys
+
 import plotly
 import pandas as pd
 
-from helper.tokenizer import tokenize
 from flask import Flask
 from flask import render_template, request, jsonify
 from plotly.graph_objs import Bar, Pie
 import joblib
 from sqlalchemy import create_engine
 
-PATH_TO_DATABASE = "../data/DisasterResponse.db"
-TABLE_NAME = "disaster_messages"
-PATH_TO_TRAINED_PIPELINE = "../models/disaster.pkl"
-PATH_TO_SCORE_TABLE = "../models/score_df.csv"
+sys.path.append(os.getcwd())
+from common.shared import tokenize, TABLE_NAME, PATH_TO_SCORE_TABLE, PATH_TO_DATABASE, PATH_TO_TRAINED_PIPELINE
 
 app = Flask(__name__)
 

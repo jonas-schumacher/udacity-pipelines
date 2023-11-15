@@ -5,6 +5,13 @@ from nltk.corpus import stopwords
 from nltk.stem.wordnet import WordNetLemmatizer
 from nltk.tokenize import word_tokenize
 
+TABLE_NAME = "disaster_messages"
+PATH_TO_CATEGORIES = "data/disaster_categories.csv"
+PATH_TO_MESSAGES = "data/disaster_messages.csv"
+PATH_TO_DATABASE = "data/DisasterResponse.db"
+PATH_TO_TRAINED_PIPELINE = "models/classifier.pkl"
+PATH_TO_SCORE_TABLE = "models/score_df.csv"
+
 
 def tokenize(text: str) -> List[str]:
     """

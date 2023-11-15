@@ -22,4 +22,5 @@ The code is separated into 3 parts:
    `python data/process_data.py data/disaster_messages.csv data/disaster_categories.csv data/DisasterResponse.db`
 2. Run ML pipeline that trains classifier and saves
    `python models/train_classifier.py data/DisasterResponse.db models/classifier.pkl`
-3. Run Flask Web App, go to `app` directory and run `python run.py`
+3. Run Flask Web App that serves the trained model:
+   `python app/run.py`

@@ -1,9 +1,11 @@
+import os
 import sys
 
 import pandas as pd
 from sqlalchemy import create_engine
 
-TABLE_NAME = "disaster_messages"
+sys.path.append(os.getcwd())
+from common.shared import TABLE_NAME
 
 
 def load_data(messages_filepath: str, categories_filepath: str) -> pd.DataFrame:
